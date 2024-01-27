@@ -1,0 +1,13 @@
+app-abc-developers:
+  description: App abc developers
+  members:
+    - app.dev1@mydomain.onmicrosoft.com
+    - app.dev2@mydomain.onmicrosoft.com
+  owners:
+    - app.owner@mydomain.onmicrosoft.com
+app-abc-readers:
+  description: App abc readers
+  members:
+    - app.reader@mydomain.onmicrosoft.com
+  owners:
+    - app.owner@mydomain.onmicrosoft.com

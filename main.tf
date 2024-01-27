@@ -1,26 +1,26 @@
 locals {
-    groups = yamldecode(file("${path.module}/groups.yaml")
-    users = toset(flatten([for group in local.groups : concat(try(group.members, []), try(group.owners, []))]))
+  folders = {
+    groups : "/groups"
+  }
+
+  config = { for param, folder in local.folders :
+    (param) => merge(flatten([for file in fileset(path.module, "${folder}/**/*.yaml") : yamldecode(file(file))])...)
+  }
 }
 
-data "azuread_client_config" "current" {}
-
-resource "azuread_group" "group" {
-  for_each = local.groups
-
-  display_name     = each.key
-  owners           = concat([data.azuread_client_config.current.object_id], try(each.value.owners, []))
-  security_enabled = true
+module "entra_id_groups" {
+  source = "./entra_id_groups"
+  groups = local.config.groups
 }
 
-data "azuread_user" "user" {
-  for_each = local.users
-  user_principal_name = each.key
+output "users" {
+  value = module.entra_id_groups.users
 }
 
-resource "azuread_group_member" "member" {
-  for_each = local.groups
+output "user_ids" {
+  value = module.entra_id_groups.user_ids
+}
 
-  group_object_id  = azuread_group.user.id
-  member_object_id = data.azuread_user.user.id
+output "group_ids" {
+  value = module.entra_id_groups.group_ids
 }
